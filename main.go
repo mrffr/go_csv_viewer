@@ -1,13 +1,29 @@
 package main
 
+import (
+  "os"
+  "fmt"
+)
+
+var fields_n int;
+
 func main(){
-  /*
-  records := read_file("test.csv")
-  for i:= range records{
-    print_record(records[i])
+  filePath := ""
+  if len(os.Args) > 1 {
+    filePath = os.Args[1]
+  } else {
+    //TODO print usage
+    os.Exit(-1)
   }
-  write_file("test_out.csv", records)
-  */
+
+  records := read_file(filePath)
+
+  if len(records) == 0 {
+    fmt.Println("No records found in", filePath);
+    os.Exit(-1)
+  }
+
+  fields_n = len(records[0]) //TODO check if this is wrong csv format
 
   run_ui()
 }
