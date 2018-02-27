@@ -6,6 +6,7 @@ import (
 )
 
 var fields_n int;
+var records [][]string;
 
 func main(){
   filePath := ""
@@ -16,7 +17,7 @@ func main(){
     os.Exit(-1)
   }
 
-  records := read_file(filePath)
+  records = read_file(filePath)
 
   if len(records) == 0 {
     fmt.Println("No records found in", filePath);

@@ -3,6 +3,7 @@ package main
 import (
   "github.com/jroimartin/gocui"
   "strconv"
+  "fmt"
 )
 
 
@@ -29,13 +30,17 @@ func run_ui(){
 
 func layout(g *gocui.Gui) error {
 	maxX, maxY := g.Size()
-  col_w := maxX / fields_n
+  col_w := maxX / fields_n //TODO var size set in read func
   for i := 0; i < fields_n; i++ {
     if v, err := g.SetView(strconv.Itoa(i), col_w*i, 0, col_w*(i+1), maxY-1); err != nil {
       if err != gocui.ErrUnknownView { return err }
 
-      //v.Frame = false //no border
-      v.Editable = true
+      v.Frame = false //no border
+      v.Editable = false
+
+      for j := range records {
+        fmt.Fprintln(v, records[j][i])
+      }
 
       if _, err := g.SetCurrentView(strconv.Itoa(i)); err != nil { return err }
     }
