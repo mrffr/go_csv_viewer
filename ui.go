@@ -42,8 +42,12 @@ func layout(g *gocui.Gui) error {
         fmt.Fprintln(v, records[j][i])
       }
 
-      if _, err := g.SetCurrentView(strconv.Itoa(i)); err != nil { return err }
     }
+  }
+
+  //setup view on first run
+  if g.CurrentView() == nil {
+    if _, err := g.SetCurrentView(strconv.Itoa(0)); err != nil { return err }
   }
 
 	return nil

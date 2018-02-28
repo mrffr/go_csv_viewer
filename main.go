@@ -5,6 +5,10 @@ import (
   "fmt"
 )
 
+//TODO
+//basic determine if there is a header -- checking types
+//sorting -- checking types
+
 var fields_n int;
 var records [][]string;
 
@@ -13,7 +17,7 @@ func main(){
   if len(os.Args) > 1 {
     filePath = os.Args[1]
   } else {
-    //TODO print usage
+    fmt.Println("Usage:",os.Args[0],"<csv file>")
     os.Exit(-1)
   }
 
