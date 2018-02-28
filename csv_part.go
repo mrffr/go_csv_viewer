@@ -3,7 +3,7 @@ package main
 import (
   "fmt"
   "os"
-  "bufio"
+//  "bufio"
   "encoding/csv"
 )
 
@@ -15,7 +15,8 @@ func read_file(filePath string) [][]string{
     os.Exit(-1)
   }
 
-  r := csv.NewReader(bufio.NewReader(f))
+  //r := csv.NewReader(bufio.NewReader(f))
+  r := csv.NewReader(f)
 
   //TODO read indivdual to calc field width for layout
   dat, err := r.ReadAll()
