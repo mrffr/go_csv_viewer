@@ -30,19 +30,30 @@ func run_ui(){
 
 func layout(g *gocui.Gui) error {
 	maxX, maxY := g.Size()
-  col_w := maxX / fields_n //TODO var size set in read func
-  for i := 0; i < fields_n; i++ {
-    if v, err := g.SetView(strconv.Itoa(i), col_w*i, 0, col_w*(i+1), maxY-1); err != nil {
+  //col_w := maxX / fields_n //TODO var size set in read func
+  mx_fl := float64(maxX)
+  lx := 0
+  rec_len := len(mv.records)
+  for i := 0; i < mv.fields_n; i++ {
+//    if v, err := g.SetView(strconv.Itoa(i), col_w*i, 0, col_w*(i+1), maxY-1); err != nil {
+    col_w := int(mx_fl * mv.width_ratios[i])
+    if v, err := g.SetView(strconv.Itoa(i), lx, 0, lx+col_w, maxY-1); err != nil {
       if err != gocui.ErrUnknownView { return err }
 
       v.Frame = false //no border
       v.Editable = false
 
-      for j := range records {
-        fmt.Fprintln(v, records[j][i])
+      j := 0
+      if mv.has_header {
+        v.Title = mv.records[0][i]
+        v.Frame = true
+        j = 1
       }
-
+      for ; j<rec_len; j++{
+        fmt.Fprintln(v, mv.records[j][i])
+      }
     }
+    lx += col_w
   }
 
   //setup view on first run
@@ -163,7 +174,7 @@ func getLastLine(v *gocui.View) int {
 
 // scrolls all columns
 func scrollViews(g *gocui.Gui, ny int){
-  for i := 0; i < fields_n; i++ {
+  for i := 0; i < mv.fields_n; i++ {
     v, err := g.View(strconv.Itoa(i))
     if err != nil { panic(err) }
     v.SetOrigin(0, ny)
@@ -179,8 +190,8 @@ func nextView (g *gocui.Gui, v *gocui.View, dir int) error {
   n, err := strconv.Atoi(v.Name())
   if err != nil { return err }
   n = (n+dir)
-  if n < 0 { n = fields_n - 1 }
-  n = n % fields_n
+  if n < 0 { n = mv.fields_n - 1 }
+  n = n % mv.fields_n
   new_v, err := g.SetCurrentView(strconv.Itoa(n))
   if err != nil { return err }
 
