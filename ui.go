@@ -131,7 +131,7 @@ func nextLine (g *gocui.Gui, v *gocui.View, dir int) error {
   x, y := v.Cursor()
 
   //moving lines
-  y = y + dir
+  y += dir
   _, pageH := v.Size()
   _, oy := v.Origin()
 
@@ -201,9 +201,9 @@ func nextView (g *gocui.Gui, v *gocui.View, dir int) error {
   //moving columns
   n, err := strconv.Atoi(v.Name())
   if err != nil { return err }
-  n = (n+dir)
+  n += dir
   if n < 0 { n = mv.fields_n - 1 }
-  n = n % mv.fields_n
+  n %= mv.fields_n
   new_v, err := g.SetCurrentView(strconv.Itoa(n))
   if err != nil { return err }
 
@@ -217,15 +217,20 @@ func sortCol(g *gocui.Gui, v *gocui.View) error{
   ind, err := strconv.Atoi(v.Name())
   if err != nil { return err }
 
-  //TODO I can't call reverse because of anonymous function which I'm using for ind
   sortbyCol := func(i, j int) bool {
+    //TODO terrible code need better solution
+    if v1, err := strconv.Atoi(mv.records[i][ind]); err == nil {
+      v2, err := strconv.Atoi(mv.records[j][ind])
+      if err != nil { panic(err) }
+      return v1 < v2
+    }
     return mv.records[i][ind] < mv.records[j][ind]
   }
 
-  //switch order on calls
-  if sort.SliceIsSorted(mv.records, sortbyCol) {
+  //switch order on subseq calls
+  if sort.SliceIsSorted(mv.records, sortbyCol) { //TODO wasteful keep a variable and switch instead of this
     sort.Slice(mv.records, func(i, j int) bool {
-      return mv.records[i][ind] > mv.records[j][ind]
+      return sortbyCol(j, i)
     })
   }else{
     sort.Slice(mv.records, sortbyCol)
