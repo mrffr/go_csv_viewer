@@ -4,6 +4,7 @@ import (
   "github.com/jroimartin/gocui"
   "strconv"
   "fmt"
+  "sort"
 )
 
 
@@ -25,7 +26,18 @@ func run_ui(){
   if err := g.MainLoop(); err != nil && err != gocui.ErrQuit {
     panic(err)
   }
+}
 
+func fill_cols(g *gocui.Gui) {
+  rec_len := len(mv.records)
+  for i := 0; i < mv.fields_n; i++ {
+    v, err := g.View(strconv.Itoa(i))
+    if err != nil { panic(err) }
+    v.Clear()
+    for j := 0; j < rec_len; j++ {
+      fmt.Fprintln(v, mv.records[j][i])
+    }
+  }
 }
 
 func layout(g *gocui.Gui) error {
@@ -33,7 +45,6 @@ func layout(g *gocui.Gui) error {
   //col_w := maxX / fields_n //TODO var size set in read func
   mx_fl := float64(maxX)
   lx := 0
-  rec_len := len(mv.records)
   for i := 0; i < mv.fields_n; i++ {
 //    if v, err := g.SetView(strconv.Itoa(i), col_w*i, 0, col_w*(i+1), maxY-1); err != nil {
     col_w := int(mx_fl * mv.width_ratios[i])
@@ -43,18 +54,15 @@ func layout(g *gocui.Gui) error {
       v.Frame = false //no border
       v.Editable = false
 
-      j := 0
       if mv.has_header {
-        v.Title = mv.records[0][i]
+        v.Title = mv.header[i]
         v.Frame = true
-        j = 1
-      }
-      for ; j<rec_len; j++{
-        fmt.Fprintln(v, mv.records[j][i])
       }
     }
     lx += col_w
   }
+
+  fill_cols(g)
 
   //setup view on first run
   if g.CurrentView() == nil {
@@ -106,6 +114,10 @@ func keybinds(g *gocui.Gui) {
     _, h := v.Size()
     return nextLine(g, v, -h)
   })
+  if err != nil { panic(err) }
+
+  //sort
+  err = g.SetKeybinding("", gocui.KeyCtrlS, gocui.ModNone, sortCol)
   if err != nil { panic(err) }
 
 }
@@ -200,3 +212,25 @@ func nextView (g *gocui.Gui, v *gocui.View, dir int) error {
   return nil
 }
 
+// Sort column in desc, asc cycle
+func sortCol(g *gocui.Gui, v *gocui.View) error{
+  ind, err := strconv.Atoi(v.Name())
+  if err != nil { return err }
+
+  //TODO I can't call reverse because of anonymous function which I'm using for ind
+  sortbyCol := func(i, j int) bool {
+    return mv.records[i][ind] < mv.records[j][ind]
+  }
+
+  //switch order on calls
+  if sort.SliceIsSorted(mv.records, sortbyCol) {
+    sort.Slice(mv.records, func(i, j int) bool {
+      return mv.records[i][ind] > mv.records[j][ind]
+    })
+  }else{
+    sort.Slice(mv.records, sortbyCol)
+  }
+
+  fill_cols(g)
+  return nil
+}

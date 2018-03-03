@@ -8,7 +8,6 @@ import (
   "encoding/csv"
 )
 
-
 func read_file(v *csvView, filePath string){
   // Load a csv file.
   f, err := os.Open(filePath)
@@ -25,14 +24,21 @@ func read_file(v *csvView, filePath string){
     os.Exit(-1)
   }
 
-  records := [][]string { header }
+  var records [][]string
+  if mv.has_header {
+    mv.header = header
+  }else{
+    records = append(records, header)
+  }
+
   fields_n := len(header)
   widths := make([]int, fields_n)
   width_ratios := make([]float64, fields_n)
 
 
+  cnt := 0
   rloop:
-  for {
+  for ;;cnt++{
     rec, err := r.Read()
     if err == io.EOF {
       break rloop
@@ -40,12 +46,13 @@ func read_file(v *csvView, filePath string){
 
     for i:= 0; i<fields_n;i++ {
       lr := len(rec[i])
-      if lr > widths[i] { widths[i] = lr } //TODO this should be running avg rather than longest??
+      widths[i] += lr
     }
     records = append(records, rec)
   }
 
   //ratios
+  for i :=0;i<fields_n;i++ { widths[i] /= cnt }
   tot := 0
   for i :=0;i<fields_n;i++ { tot += widths[i] }
 
@@ -58,3 +65,4 @@ func read_file(v *csvView, filePath string){
 
   f.Close()
 }
+

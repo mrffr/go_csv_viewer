@@ -8,12 +8,16 @@ import (
 
 //TODO
 //sorting -- checking types
-//highlight full line across columns
+//highlight full line across columns possible???
+//don't like column sizing idea. not sure fixable
+//regarding above allow horiz scroll of columns
 
 type csvView struct {
   fields_n int
   has_header bool
+  header []string
   records [][]string //actual data
+  max_widths []int //actual widths
   width_ratios []float64 //testing column sizing calculations
 }
 
@@ -26,6 +30,7 @@ func main(){
   flag.Parse()
 
   if len(os.Args) > 1 {
+    //TODO better way to do this may lie in flag
     filePath = os.Args[len(os.Args)-1] //assume file comes last
   } else {
     fmt.Println("Usage:",os.Args[0],"FLAGS <csv file>")
