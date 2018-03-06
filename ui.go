@@ -45,10 +45,11 @@ func layout(g *gocui.Gui) error {
   //col_w := maxX / fields_n //TODO var size set in read func
   mx_fl := float64(maxX)
   lx := 0
+  helper_h := 3
   for i := 0; i < mv.fields_n; i++ {
 //    if v, err := g.SetView(strconv.Itoa(i), col_w*i, 0, col_w*(i+1), maxY-1); err != nil {
     col_w := int(mx_fl * mv.width_ratios[i])
-    if v, err := g.SetView(strconv.Itoa(i), lx, 0, lx+col_w, maxY-1); err != nil {
+    if v, err := g.SetView(strconv.Itoa(i), lx, 0, lx+col_w, maxY-1-helper_h); err != nil {
       if err != gocui.ErrUnknownView { return err }
 
       v.Frame = false //no border
@@ -67,6 +68,14 @@ func layout(g *gocui.Gui) error {
   //setup view on first run
   if g.CurrentView() == nil {
     if _, err := g.SetCurrentView(strconv.Itoa(0)); err != nil { return err }
+  }
+
+  //helper height
+  if v, err := g.SetView("helper", 0, maxY-helper_h, maxX-1, maxY-1); err != nil {
+    if err != gocui.ErrUnknownView { return err }
+    v.Editable = false
+
+    fmt.Fprintln(v, "Ctrl-C: quit |", "Ctrl-S: sort |")
   }
 
 	return nil
