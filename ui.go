@@ -5,6 +5,7 @@ import (
   "strconv"
   "fmt"
   "sort"
+  //"log"
 )
 
 
@@ -75,7 +76,7 @@ func layout(g *gocui.Gui) error {
     if err != gocui.ErrUnknownView { return err }
     v.Editable = false
 
-    fmt.Fprintln(v, "Ctrl-C: quit |", "Ctrl-S: sort |")
+    fmt.Fprintln(v, "Ctrl-C: quit |", "Ctrl-S: sort | Ctrl-F/B: scroll horiz | <arrow keys/PgUp/PgDn>: move |")
   }
 
 	return nil
@@ -97,7 +98,7 @@ func keybinds(g *gocui.Gui) {
   })
   if err != nil { panic(err) }
 
-  // left right
+  // left right columns
   err = g.SetKeybinding("", gocui.KeyArrowRight, gocui.ModNone,
   func(g *gocui.Gui, v *gocui.View) error {
     return nextView(g, v, 1)
@@ -107,6 +108,18 @@ func keybinds(g *gocui.Gui) {
   err = g.SetKeybinding("", gocui.KeyArrowLeft, gocui.ModNone,
   func(g *gocui.Gui, v *gocui.View) error {
     return nextView(g, v, -1)
+  })
+  if err != nil { panic(err) }
+
+  // horiz scroll
+  err = g.SetKeybinding("", gocui.KeyCtrlF, gocui.ModNone,
+  func(g *gocui.Gui, v *gocui.View) error {
+    return scrollHoriz(g, v, 1)
+  })
+  if err != nil { panic(err) }
+  err = g.SetKeybinding("", gocui.KeyCtrlB, gocui.ModNone,
+  func(g *gocui.Gui, v *gocui.View) error {
+    return scrollHoriz(g, v, -1)
   })
   if err != nil { panic(err) }
 
@@ -193,13 +206,30 @@ func getLastLine(v *gocui.View) int {
   return -1
 }
 
-// scrolls all columns
+// scrolls all views up or down
 func scrollViews(g *gocui.Gui, ny int){
   for i := 0; i < mv.fields_n; i++ {
     v, err := g.View(strconv.Itoa(i))
     if err != nil { panic(err) }
     v.SetOrigin(0, ny)
   }
+}
+
+// scrolls view horizontally
+func scrollHoriz(g *gocui.Gui, v *gocui.View, dir int) error {
+  _, y := v.Cursor()
+  ox, oy := v.Origin()
+  sx, _ := v.Size()
+  vln, _ := v.Line(y)
+  line_width := len(vln)
+
+  nx := ox + dir
+
+  //out of bounds
+  if nx + sx > line_width || nx < 0 { return nil }
+
+  v.SetOrigin(ox + dir, oy)
+  return nil
 }
 
 // Move to next view dir is -1, 1 for l,r wraps around.

@@ -6,11 +6,12 @@ import (
   "flag"
 )
 
-//TODO
+//Ideas
 //sorting -- checking types
 //highlight full line across columns possible???
 //don't like column sizing idea. not sure fixable
-//regarding above allow horiz scroll of columns
+//expand/contract columns
+//jump to horiz line start/end inside column
 
 type csvView struct {
   fields_n int
