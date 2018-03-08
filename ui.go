@@ -82,45 +82,35 @@ func layout(g *gocui.Gui) error {
 	return nil
 }
 
+func call_move_control(foo func (*gocui.Gui,*gocui.View, int) error, dir int) func (*gocui.Gui, *gocui.View) error {
+		 return func(g *gocui.Gui, v *gocui.View) error {
+		 				return foo(g, v, dir)
+		 }
+}
+
+
 func keybinds(g *gocui.Gui) {
   err := g.SetKeybinding("", gocui.KeyCtrlC, gocui.ModNone, quit)
   if err != nil { panic(err) }
 
-  err = g.SetKeybinding("", gocui.KeyArrowDown, gocui.ModNone,
-  func(g *gocui.Gui, v *gocui.View) error {
-    return nextLine(g, v, 1)
-  })
+  err = g.SetKeybinding("", gocui.KeyArrowDown, gocui.ModNone, call_move_control(nextLine, 1))
   if err != nil { panic(err) }
 
-  err = g.SetKeybinding("", gocui.KeyArrowUp, gocui.ModNone,
-  func(g *gocui.Gui, v *gocui.View) error {
-    return nextLine(g, v, -1)
-  })
+  err = g.SetKeybinding("", gocui.KeyArrowUp, gocui.ModNone, call_move_control(nextLine, -1))
   if err != nil { panic(err) }
 
   // left right columns
-  err = g.SetKeybinding("", gocui.KeyArrowRight, gocui.ModNone,
-  func(g *gocui.Gui, v *gocui.View) error {
-    return nextView(g, v, 1)
-  })
+  err = g.SetKeybinding("", gocui.KeyArrowRight, gocui.ModNone, call_move_control(nextView, 1))
   if err != nil { panic(err) }
 
-  err = g.SetKeybinding("", gocui.KeyArrowLeft, gocui.ModNone,
-  func(g *gocui.Gui, v *gocui.View) error {
-    return nextView(g, v, -1)
-  })
+  err = g.SetKeybinding("", gocui.KeyArrowLeft, gocui.ModNone, call_move_control(nextView, -1))
   if err != nil { panic(err) }
 
   // horiz scroll
-  err = g.SetKeybinding("", gocui.KeyCtrlF, gocui.ModNone,
-  func(g *gocui.Gui, v *gocui.View) error {
-    return scrollHoriz(g, v, 1)
-  })
+  err = g.SetKeybinding("", gocui.KeyCtrlF, gocui.ModNone, call_move_control(scrollHoriz, 1))
   if err != nil { panic(err) }
-  err = g.SetKeybinding("", gocui.KeyCtrlB, gocui.ModNone,
-  func(g *gocui.Gui, v *gocui.View) error {
-    return scrollHoriz(g, v, -1)
-  })
+
+  err = g.SetKeybinding("", gocui.KeyCtrlB, gocui.ModNone, call_move_control(scrollHoriz, -1))
   if err != nil { panic(err) }
 
   //paging
@@ -228,7 +218,7 @@ func scrollHoriz(g *gocui.Gui, v *gocui.View, dir int) error {
   //out of bounds
   if nx + sx > line_width || nx < 0 { return nil }
 
-  v.SetOrigin(ox + dir, oy)
+  v.SetOrigin(nx, oy)
   return nil
 }
 
