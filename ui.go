@@ -43,7 +43,6 @@ func fill_cols(g *gocui.Gui) {
 
 func layout(g *gocui.Gui) error {
 	maxX, maxY := g.Size()
-  //col_w := maxX / fields_n //TODO var size set in read func
   mx_fl := float64(maxX)
   lx := 0
   helper_h := 3
@@ -83,9 +82,9 @@ func layout(g *gocui.Gui) error {
 }
 
 func call_move_control(foo func (*gocui.Gui,*gocui.View, int) error, dir int) func (*gocui.Gui, *gocui.View) error {
-		 return func(g *gocui.Gui, v *gocui.View) error {
-		 				return foo(g, v, dir)
-		 }
+  return func(g *gocui.Gui, v *gocui.View) error {
+    return foo(g, v, dir)
+  }
 }
 
 
@@ -150,31 +149,21 @@ func nextLine (g *gocui.Gui, v *gocui.View, dir int) error {
   if y >= pageH { //scroll down
     scrollViews(g, oy + pageH)
 
-    //if top of page is now blank we scrolled too far
-    //so revert scroll
-    if ! notEmptyLine(v, 0) {
-      scrollViews(g, oy)
-    }
-
-    if notEmptyLine(v, y - pageH) {
+    if ! isEmptyLine(v, y - pageH) {
       v.SetCursor(x, y - pageH)
     }else{
       //set cursor on last occupied line
       v.SetCursor(x, getLastLine(v))
     }
   }else if y < 0{ //scroll up
-
-    //we are already at the top
-    if oy == 0 { return nil }
-    //scroll up page
+    if oy == 0 { return nil; } //can't scroll up at top
     ny := oy - pageH
-    //make sure we don't overshoot top
-    if ny < 0 { ny = 0 }
+
     scrollViews(g, ny)
     v.SetCursor(x, y + pageH)
   }else{
     //normal movement
-    if notEmptyLine(v, y) { //TODO only need to check on scroll down
+    if y <= getLastLine(v) { //don't scroll past last line
       v.SetCursor(x, y)
     }
   }
@@ -182,22 +171,19 @@ func nextLine (g *gocui.Gui, v *gocui.View, dir int) error {
   return nil
 }
 
-func notEmptyLine(v *gocui.View, y int) bool{
+func isEmptyLine(v *gocui.View, y int) bool{
   ln, _ := v.Line(y)
-  return (len(ln) > 0)
+  return (len(ln) == 0)
 }
 
 func getLastLine(v *gocui.View) int {
-  _, h := v.Size()
-  for i := h; i >= 0; i-- {
-    if notEmptyLine(v, i){ return i }
-  }
-  panic(-1)
-  return -1
+  _, oy := v.Origin()
+  return mv.records_len - oy;
 }
 
-// scrolls all views up or down
+// scrolls all views up or down won't over or undershoot records
 func scrollViews(g *gocui.Gui, ny int){
+  if ny > mv.records_len { return; } // don't overshoot records
   for i := 0; i < mv.fields_n; i++ {
     v, err := g.View(strconv.Itoa(i))
     if err != nil { panic(err) }

@@ -40,6 +40,7 @@ func read_file(v *csvView, filePath string){
   for ;;cnt++{
     rec, err := r.Read()
     if err == io.EOF {
+      cnt -= 1
       break rloop
     }
 
@@ -59,6 +60,7 @@ func read_file(v *csvView, filePath string){
 
   //
   v.fields_n = fields_n
+  v.records_len = cnt
   v.records = records
   v.width_ratios = width_ratios
 

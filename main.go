@@ -10,11 +10,10 @@ import (
 //sorting -- checking types
 //highlight full line across columns possible???
 //don't like column sizing idea. not sure fixable
-//expand/contract columns
-//jump to horiz line start/end inside column
 
 type csvView struct {
   fields_n int
+  records_len int
   has_header bool
   header []string
   records [][]string //actual data
@@ -41,13 +40,6 @@ func main(){
 
   mv.has_header = *has_header
   read_file(&mv, filePath)
-
-
-  /*
-  if mv.has_header {
-    for i:=0;i<mv.fields_n;i++ { fmt.Println(mv.width_ratios[i])}
-  }
-  */
 
   run_ui()
 }
