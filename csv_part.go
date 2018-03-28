@@ -45,7 +45,7 @@ rloop:
 		}
 
 		for i := 0; i < fields_n; i++ {
-			lr := len(rec[i])
+			lr := len(rec[i]) + 1 //??? \0
 			widths[i] += lr
       if(lr >= max_widths[i]){
         max_widths[i] = lr

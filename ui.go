@@ -19,6 +19,7 @@ func run_ui() {
 	g.Highlight = true
 	g.Cursor = true
 	g.SelFgColor = gocui.ColorGreen
+  g.FgColor = gocui.ColorBlue
 	//g.SelBgColor = gocui.ColorRed
 
 	g.SetManagerFunc(layout)
@@ -52,22 +53,51 @@ func sum(arr []int, n int) int{
   return s
 }
 
-func get_col_width(maxX int) []int{
+
+// try to get columns to size in a useful way
+func set_col_width(maxX int) []int{
 	mx_fl := float64(maxX)
   col_widths := make([]int, mv.fields_n)
   copy(col_widths, mv.max_widths)
 
   s := sum(col_widths, mv.fields_n)
+  //log.Println(maxX, s)
+  //fields are too big for screen size
   if(s > maxX){
-    ind := 0
-    for (sum(col_widths, mv.fields_n) > maxX){
-      //TODO reduce starting with largest
-      col_widths[ind] = int(mx_fl * mv.width_ratios[ind])
-      ind ++
+    //sort them to reduce from largest
+    //add index to maintain orig order probably nicer way
+    indexable_widths := make([][2]int, mv.fields_n)
+    for i:=0; i<mv.fields_n; i++ {
+      indexable_widths[i][0] = i
+      indexable_widths[i][1] = mv.max_widths[i]
     }
+
+    //sort widths so we can start reducing size with largest
+    sort.Slice(indexable_widths, func(i, j int) bool {
+      return indexable_widths[i][1] > indexable_widths[j][1]
+    })
+
+    //go through reducing size from largest until
+    ind := 0
+    for {
+      next_largest_index := indexable_widths[ind][0]
+      col_widths[next_largest_index] = int(mx_fl * mv.width_ratios[ind])
+      //log.Println(maxX, s, next_largest_index, indexable_widths[ind][1], "->", col_widths[next_largest_index])
+      ind ++
+      s = sum(col_widths, mv.fields_n)
+      //expand it out in case we undershoot
+      if (s < maxX) {
+        col_widths[next_largest_index] += (maxX - s) 
+        break
+      }
+    }
+    //log.Println(ind, col_widths)
   } else {
+    //TODO fix this it's not correct
+    extra_w := float64(maxX - s)
     for i:=0;i<mv.fields_n;i++ {
-      col_widths[i] = int(mx_fl * mv.width_ratios[i])
+      v := int(extra_w * mv.width_ratios[i])
+      col_widths[i] += v
     }
   }
 
@@ -79,7 +109,7 @@ func layout(g *gocui.Gui) error {
 	lx := 0
 	helper_h := 3
 
-  col_widths := get_col_width(maxX)
+  col_widths := set_col_width(maxX-1)
 
 	for i := 0; i < mv.fields_n; i++ {
 		if v, err := g.SetView(strconv.Itoa(i), lx, 0, lx + col_widths[i], maxY-1-helper_h); err != nil {
