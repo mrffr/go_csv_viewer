@@ -5,29 +5,31 @@ import (
 	"fmt"
 	"io"
 	"os"
+  "errors"
 )
 
-func read_file(v *csvView, filePath string) {
-	// Load a csv file.
+// Load a csv file.
+func open_csv_file(filePath string) *os.File {
 	f, err := os.Open(filePath)
 	if err != nil {
 		fmt.Println(filePath, "not found.")
 		os.Exit(-1)
 	}
+  return f
+}
 
+func read_file(v *csvView, f *os.File) error {
 	r := csv.NewReader(f)
 
-	header, err := r.Read()
-	if err == io.EOF {
-		fmt.Println("No records found in file")
-		os.Exit(-1)
-	}
 
-	var records [][]string
+  //peak first line
+  header, err := r.Read()
+  if err == io.EOF {
+    return errors.New("Empty file")
+  }
+
 	if mv.has_header {
 		mv.header = header
-	} else {
-		records = append(records, header)
 	}
 
 	fields_n := len(header)
@@ -35,12 +37,21 @@ func read_file(v *csvView, filePath string) {
 	width_ratios := make([]float64, fields_n)
   max_widths := make([]int, fields_n)
 
+  //if we don't have a header unget the first line
+  if !mv.has_header {
+    f.Seek(0,0)
+    r = csv.NewReader(f)
+  }
+
 	cnt := 0
+	var records [][]string
 rloop:
 	for ; ; cnt++ {
 		rec, err := r.Read()
 		if err == io.EOF {
-			cnt -= 1
+      if cnt == 0 {
+        return errors.New("No records found")
+      }
 			break rloop
 		}
 
@@ -74,5 +85,5 @@ rloop:
 	v.width_ratios = width_ratios
   v.max_widths = max_widths
 
-	f.Close()
+  return nil
 }

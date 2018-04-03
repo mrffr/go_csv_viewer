@@ -39,7 +39,13 @@ func main() {
 	}
 
 	mv.has_header = *has_header
-	read_file(&mv, filePath)
+  f := open_csv_file(filePath)
+  err := read_file(&mv, f)
+  if err != nil {
+    fmt.Println("Error", err)
+    os.Exit(-1)
+  }
+  f.Close()
 
 	run_ui()
 }

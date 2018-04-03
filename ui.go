@@ -5,7 +5,7 @@ import (
 	"github.com/jroimartin/gocui"
 	"sort"
 	"strconv"
-//	"log"
+	//"log"
 )
 
 func run_ui() {
@@ -114,7 +114,8 @@ func layout(g *gocui.Gui) error {
 	for i := 0; i < mv.fields_n; i++ {
 		if v, err := g.SetView(strconv.Itoa(i), lx, 0, lx + col_widths[i], maxY-1-helper_h); err != nil {
 			if err != gocui.ErrUnknownView {
-				return err
+        //log.Println(lx, col_widths, mv.width_ratios, mv.max_widths, mv.fields_n, mv.records_len)
+        panic(err)
 			}
 
 			v.Frame = false //no border

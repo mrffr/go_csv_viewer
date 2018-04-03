@@ -1,1 +1,3 @@
 go_csv_viewer
+testdata/
+main_test.go
