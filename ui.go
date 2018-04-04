@@ -19,7 +19,7 @@ func run_ui() {
 	g.Highlight = true
 	g.Cursor = true
 	g.SelFgColor = gocui.ColorGreen
-  g.FgColor = gocui.ColorBlue
+  //g.FgColor = gocui.ColorBlue
 	//g.SelBgColor = gocui.ColorRed
 
 	g.SetManagerFunc(layout)
