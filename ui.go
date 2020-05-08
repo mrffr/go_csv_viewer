@@ -32,15 +32,20 @@ func run_ui() {
 }
 
 func fill_cols(g *gocui.Gui) {
-	rec_len := len(mv.records)
 	for i := 0; i < mv.fields_n; i++ {
+    // setup ith columns view
 		v, err := g.View(strconv.Itoa(i))
 		if err != nil {
 			panic(err)
 		}
 		v.Clear()
-		for j := 0; j < rec_len; j++ {
-			fmt.Fprintln(v, mv.records[j][i])
+    // print to ith column
+		for j := 0; j < mv.records_len; j++ {
+      if mv.records[j][i] == "" {
+        fmt.Fprintln(v, " ") //handle issue with empty fields messing up columns
+      }else{
+        fmt.Fprintln(v, mv.records[j][i])
+      }
 		}
 	}
 }
@@ -339,14 +344,30 @@ func sortCol(g *gocui.Gui, v *gocui.View) error {
 
 	sortbyCol := func(i, j int) bool {
 		//TODO terrible code need better solution
-		if v1, err := strconv.Atoi(mv.records[i][ind]); err == nil {
-			v2, err := strconv.Atoi(mv.records[j][ind])
+    r1 := mv.records[i][ind]
+    r2 := mv.records[j][ind]
+
+    //handle if the fields are empty
+    if r1 == "" {
+      return false
+    }
+    if r2 == "" {
+      return true
+    }
+
+    //try to sort as ints otherwise fall through
+		if v1, err := strconv.Atoi(r1); err == nil {
+			v2, err := strconv.Atoi(r2)
 			if err != nil {
-				panic(err)
+				//panic(err) //field has non-empty mixed type values
+        //perhaps should just revert to string comparison here
+        return r1 < r2
 			}
 			return v1 < v2
 		}
-		return mv.records[i][ind] < mv.records[j][ind]
+
+    //revert to sort by string
+		return r1 < r2
 	}
 
 	//switch order on subseq calls
@@ -355,8 +376,9 @@ func sortCol(g *gocui.Gui, v *gocui.View) error {
 			return sortbyCol(j, i)
 		})
 	} else {
-		sort.Slice(mv.records, sortbyCol)
+		sort.SliceStable(mv.records, sortbyCol)
 	}
+
 
 	fill_cols(g)
 	return nil
