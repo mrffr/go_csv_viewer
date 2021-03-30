@@ -9,11 +9,10 @@ import (
 )
 
 func run_ui() {
-	g, err := gocui.NewGui(gocui.OutputNormal)
+	g, err := gocui.NewGui(gocui.OutputNormal, true)
 	if err != nil {
 		panic(err)
 	}
-
 	defer g.Close()
 
 	g.Highlight = true
@@ -117,8 +116,8 @@ func layout(g *gocui.Gui) error {
   col_widths := set_col_width(maxX-1)
 
 	for i := 0; i < mv.fields_n; i++ {
-		if v, err := g.SetView(strconv.Itoa(i), lx, 0, lx + col_widths[i], maxY-1-helper_h); err != nil {
-			if err != gocui.ErrUnknownView {
+		if v, err := g.SetView(strconv.Itoa(i), lx, 0, lx + col_widths[i], maxY-1-helper_h, 0); err != nil {
+			if ! gocui.IsUnknownView(err) {
         //log.Println(lx, col_widths, mv.width_ratios, mv.max_widths, mv.fields_n, mv.records_len)
         panic(err)
 			}
@@ -144,8 +143,8 @@ func layout(g *gocui.Gui) error {
 	}
 
 	//helper height
-	if v, err := g.SetView("helper", 0, maxY-helper_h, maxX-1, maxY-1); err != nil {
-		if err != gocui.ErrUnknownView {
+	if v, err := g.SetView("helper", 0, maxY-helper_h, maxX-1, maxY-1, 0); err != nil {
+    if ! gocui.IsUnknownView(err) {
 			return err
 		}
 		v.Editable = false
