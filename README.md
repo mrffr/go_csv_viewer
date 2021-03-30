@@ -1,4 +1,4 @@
-# go csv viewer
+# Golang Terminal CSV Viewer
 
-csv viewer with the ability to sort columns.
+Terminal CSV file viewer with the ability to sort columns.
 Uses [gocui](https://github.com/jroimartin/gocui)

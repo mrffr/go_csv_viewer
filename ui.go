@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/jroimartin/gocui"
+	"github.com/awesome-gocui/gocui"
 	"sort"
 	"strconv"
 	//"log"
@@ -92,7 +92,7 @@ func set_col_width(maxX int) []int{
       s = sum(col_widths, mv.fields_n)
       //expand it out in case we undershoot
       if (s < maxX) {
-        col_widths[next_largest_index] += (maxX - s) 
+        col_widths[next_largest_index] += (maxX - s)
         break
       }
     }
@@ -343,7 +343,7 @@ func sortCol(g *gocui.Gui, v *gocui.View) error {
 	}
 
 	sortbyCol := func(i, j int) bool {
-		//TODO terrible code need better solution
+		//TODO need better solution
     r1 := mv.records[i][ind]
     r2 := mv.records[j][ind]
 
