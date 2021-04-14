@@ -26,7 +26,7 @@ var mv csvView
 func main() {
 	filePath := ""
 
-	var has_header = flag.Bool("nh", true, "the file has no header")
+	var has_header = flag.Bool("nh", true, "the csv file does not have a header listing field names.")
 	flag.Parse()
 
 	if len(os.Args) > 1 {
