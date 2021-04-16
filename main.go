@@ -26,7 +26,7 @@ var mv csvView
 func main() {
 	filePath := ""
 
-	var has_header = flag.Bool("nh", true, "the csv file does not have a header listing field names.")
+	var has_header = flag.Bool("nh", false, "the csv file does not have a header listing field names.")
 	flag.Parse()
 
 	if len(os.Args) > 1 {
@@ -38,7 +38,7 @@ func main() {
 		os.Exit(-1)
 	}
 
-	mv.has_header = *has_header
+	mv.has_header = !*has_header
   f := open_csv_file(filePath)
   err := read_file(&mv, f)
   if err != nil {
