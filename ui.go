@@ -122,12 +122,12 @@ func layout(g *gocui.Gui) error {
         panic(err)
 			}
 
-			v.Frame = false //no border
+			v.Frame = false //no borders unless we have header
 			v.Editable = false
 
 			if mv.has_header {
 				v.Title = mv.header[i]
-				v.Frame = true
+        v.Frame = true
 			}
 		}
 		lx += col_widths[i]
